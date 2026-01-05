@@ -24,6 +24,56 @@ const questions = [
       { value: 'no', label: 'לא' },
     ],
   },
+  {
+    key: 'permitBefore1980',
+    label: 'האם היתר הבנייה המקורי ניתן לפני 1 בינואר 1980?',
+    type: 'select',
+    options: [
+      { value: 'yes', label: 'כן' },
+      { value: 'no', label: 'לא' },
+      { value: 'unknown', label: 'לא יודע/ת' },
+    ],
+  },
+  {
+    key: 'moreThanOneFloor',
+    label: 'האם יש לבניין יותר מקומה אחת?',
+    type: 'select',
+    options: [
+      { value: 'yes', label: 'כן' },
+      { value: 'no', label: 'לא' },
+    ],
+  },
+  {
+    key: 'agreementPercentage',
+    label: 'האם אחוז ההסכמה הנוכחי עומד על 66% (2/3) ומעלה מבעלי הדירות?',
+    type: 'select',
+    options: [
+      { value: 'above66', label: 'כן, 66% ומעלה' },
+      { value: '50to66', label: 'בין 50% ל-66%' },
+      { value: 'below50', label: 'פחות מ-50%' },
+      { value: 'unknown', label: 'לא יודע/ת' },
+    ],
+  },
+  {
+    key: 'unitsOver24',
+    label: 'האם מספר יחידות הדיור במתחם המיועד עולה על 24?',
+    type: 'select',
+    options: [
+      { value: 'yes', label: 'כן' },
+      { value: 'no', label: 'לא' },
+      { value: 'unknown', label: 'לא יודע/ת' },
+    ],
+  },
+  {
+    key: 'urbanPlan',
+    label: 'האם הבניין ממוקם באזור שהוגדר בתוכנית המתאר העירונית (תב"ע/תוכנית כוללנית) כמתאים לפינוי-בינוי?',
+    type: 'select',
+    options: [
+      { value: 'yes', label: 'כן' },
+      { value: 'no', label: 'לא' },
+      { value: 'unknown', label: 'לא יודע/ת' },
+    ],
+  },
 ]
 
 export default function Eligibility() {
@@ -35,7 +85,8 @@ export default function Eligibility() {
   const currentQuestion = questions[step]
 
   const next = () => {
-    if (!currentAnswer.trim()) return // ולידציה פשוטה
+    if (!currentAnswer.trim() && currentQuestion.type !== 'select') return
+    if (currentQuestion.type === 'select' && !currentAnswer) return
 
     setAnswers({ ...answers, [currentQuestion.key]: currentAnswer })
 
@@ -43,7 +94,6 @@ export default function Eligibility() {
       setStep(step + 1)
       setCurrentAnswer('')
     } else {
-      // העברת כל התשובות לדף הליד
       const params = new URLSearchParams({ ...answers, [currentQuestion.key]: currentAnswer })
       router.push(`/lead?${params.toString()}`)
     }
@@ -51,7 +101,6 @@ export default function Eligibility() {
 
   const back = () => {
     if (step > 0) {
-      // מחיקת התשובה הנוכחית כדי לא לשמור ריק
       const newAnswers = { ...answers }
       delete newAnswers[currentQuestion.key]
       setAnswers(newAnswers)
@@ -113,7 +162,7 @@ export default function Eligibility() {
 
           <button
             onClick={next}
-            disabled={!currentAnswer.trim()}
+            disabled={!currentAnswer.trim() && currentQuestion.type !== 'select' || currentQuestion.type === 'select' && !currentAnswer}
             className="px-8 py-3 bg-black text-white rounded-xl disabled:bg-gray-300"
           >
             {step === questions.length - 1 ? 'סיום' : 'המשך'}
